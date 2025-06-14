@@ -49,3 +49,5 @@ ciphertext = '8220b7c47b36777a737f5ef9caa2814cf20c1c1ef496ec21a9b4833da24a008d08
 print(decrypt_flag(shared_secret, iv, ciphertext))
 ```
 
+![image](https://github.com/user-attachments/assets/1bf0d2a0-a9bc-46e7-9542-47c09bff9f30)
+
