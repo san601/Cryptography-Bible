@@ -71,7 +71,7 @@ fake_g = A -> Bob return B = fake_g ^ b = A ^ b = shared_key
 ```
 
 Solve.py:
-```
+```python
 from pwn import * # pip install pwntools
 import json
 
