@@ -20,6 +20,10 @@ Intercepted from Alice: {"iv": "c69f9d582562f4b3302fae9e9505accd", "encrypted_fl
 ```
 
 Now you can decrypt the flag using the shared key between you and Alice.
+
+![image](https://github.com/user-attachments/assets/95221d4c-8594-4a1c-885f-3478625b1202)
+
+
 ### Export Grade
 This is a concrete example of how a downgrade attack works. Downgrade attack can also happen if you misconfigure your system.
 
@@ -45,7 +49,9 @@ sage: a
 5870161511817033205
 ```
 
-You now have the shared key between Alice and Bob, next, process to decrypt the flag using AES mode CBC like normal.
+You now have the shared key between Alice and Bob. Next, process to decrypt the flag using AES mode CBC like normal.
+
+![image](https://github.com/user-attachments/assets/43c9409c-8f6e-45ee-9393-f31eb0b7f1ce)
 
 ### Static Client
 We can give Bob p, g, A and Bob will use those parameters to calculate his g ^ b
@@ -137,3 +143,5 @@ ciphertext = encrypted
 
 print(decrypt_flag(shared_secret, iv, ciphertext))
 ```
+
+![image](https://github.com/user-attachments/assets/47da88f0-574c-4e44-9397-6ed3728d8138)
