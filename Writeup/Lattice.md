@@ -137,25 +137,112 @@ print("Recovered flag:", flag_bytes.decode('utf-8', errors='ignore'))
 
 This is an example of how primal attack can be used since error is small compared to modulus q. Firstly, we need to construct a lattice, I choose this:
 
-$$
-\( M \in \mathbb{Z}^{n + m + 1 \times m + 1} \):
+![image](https://github.com/user-attachments/assets/6c1764f1-2f00-4841-9aa9-29c9cd1f9d6a)
 
-\[
-M =
-\begin{bmatrix}
-b_1 & b_2 & \cdots & b_m & q \\
-A_{1,1} & A_{2,1} & \cdots & A_{m,1} & 0 \\
-A_{1,2} & A_{2,2} & \cdots & A_{m,2} & 0 \\
-\vdots & \vdots & \ddots & \vdots & \vdots \\
-A_{1,n} & A_{2,n} & \cdots & A_{m,n} & 0 \\
-q & 0 & \cdots & 0 & 0 \\
-0 & q & \cdots & 0 & 0 \\
-\vdots & \vdots & \ddots & \vdots & \vdots \\
-0 & 0 & \cdots & q & 0 \\
-\end{bmatrix}
-\]
+which gives us this when apply LLL:
 
-- First row: the `b_i` values and `q` in the last column.
-- Rows 2 to \(n+1\): transposed LWE matrix \( A^T \).
-- Rows \(n+2\) to \(n+1+m\): scaled identity matrix \( q \cdot I_m \) to stabilize the lattice.
-$$
+![image](https://github.com/user-attachments/assets/91ff412d-da96-437a-b3e8-0911986b177b)
+
+Next, reconstruct the secret key S and use the code in LWE Low Bits to solve for the flag.
+
+```python
+from pwn import *
+import json
+import ast
+import numpy as np
+from sage.all import *
+
+HOST = "socket.cryptohack.org"
+PORT = 13413
+
+r = remote(HOST, PORT)
+
+def json_recv():
+    line = r.readline()
+    return json.loads(line.decode())
+
+def json_send(hsh):
+    request = json.dumps(hsh).encode()
+    r.sendline(request)
+
+print(r.readline())
+
+A_matrix = []
+b_vector = []
+n = 64
+p = 257
+q = 1048583
+m = 128
+
+for i in range(m):
+    request = {
+        "option": "encrypt",
+        "message": "0"
+    }
+    json_send(request)
+    response = json_recv()
+    A = list(map(int, ast.literal_eval(response["A"])))
+    b = int(response["b"])
+
+    # Scale down p * e -> e
+    for x in range(n):
+        A[x] = (A[x] * pow(p, -1, q)) % q
+    b = (b * pow(p, -1, q)) % q
+    
+    A_matrix.append(A)
+    b_vector.append(b)
+
+F = GF(q)
+A = Matrix(F, A_matrix)
+b = vector(F, b_vector)
+print(f"A: {A.nrows()}x{A.ncols()}")
+print(f"b: {b}")
+
+M = Matrix(ZZ, n + 1 + m, m + 1)
+
+for i in range(m):
+    M[0, i] = b[i]
+M[0, m] = q
+for i in range(n):
+    for j in range(m):
+        M[i + 1, j] = A[j, i] % q
+for i in range(m):
+    M[n + 1 + i, i] = q
+
+L = M.LLL()
+
+err = L[-1]
+if err[-1] < 0:
+    err = [-e for e in err]
+
+e = vector(err[:-1])
+
+print(f"e: {e}")
+
+# Get the secret S
+b_vec = vector(F, [(b[i] - e[i]) % q for i in range(m)])
+S = A.solve_right(b_vec)
+print(f"S: {S}")
+
+for j in range(32):
+    request = {
+        "option": "get_flag",
+        "index": f"{j}"
+    }
+    json_send(request)
+    response = json_recv()
+    A = list(map(int, ast.literal_eval(response["A"])))
+    b = int(response["b"])
+    A = vector(F, A)
+    sum = 0
+    for i in range(len(S)):
+        sum += A[i] * S[i] % q
+    x = b - int(sum) % q
+
+    m = x % p
+    print(chr(m), end='')
+```
+
+Result:
+
+![image](https://github.com/user-attachments/assets/26ee8602-1ba2-41b6-8f09-1f622ce8db20)
