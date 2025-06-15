@@ -132,3 +132,28 @@ print("Recovered flag:", flag_bytes.decode('utf-8', errors='ignore'))
 ```
 
 ![image](https://github.com/user-attachments/assets/4bb4249d-980e-4a4d-9ac3-157555f32363)
+
+## Noise Cheap
+
+This is an example of how primal attack can be used since error is small compared to modulus q. Firstly, we need to construct a lattice, I choose this:
+
+\( M \in \mathbb{Z}^{n + m + 1 \times m + 1} \):
+
+\[
+M =
+\begin{bmatrix}
+b_1 & b_2 & \cdots & b_m & q \\
+A_{1,1} & A_{2,1} & \cdots & A_{m,1} & 0 \\
+A_{1,2} & A_{2,2} & \cdots & A_{m,2} & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+A_{1,n} & A_{2,n} & \cdots & A_{m,n} & 0 \\
+q & 0 & \cdots & 0 & 0 \\
+0 & q & \cdots & 0 & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & \cdots & q & 0 \\
+\end{bmatrix}
+\]
+
+- First row: the `b_i` values and `q` in the last column.
+- Rows 2 to \(n+1\): transposed LWE matrix \( A^T \).
+- Rows \(n+2\) to \(n+1+m\): scaled identity matrix \( q \cdot I_m \) to stabilize the lattice.
