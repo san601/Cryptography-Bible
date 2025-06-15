@@ -135,6 +135,8 @@ print("Recovered flag:", flag_bytes.decode('utf-8', errors='ignore'))
 
 ## Noise Cheap
 
+Desc: A core part of making LWE secure is having the noise terms be larger than what lattice reduction algorithms can handle.
+
 This is an example of how primal attack can be used since error is small compared to modulus q. Firstly, we need to construct a lattice, I choose this:
 
 ![image](https://github.com/user-attachments/assets/6c1764f1-2f00-4841-9aa9-29c9cd1f9d6a)
@@ -153,7 +155,7 @@ def encrypt(m):
     return A, b
 ```
 
-So we need to scale down (A, b) by 257 in GF(q).
+So we need to scale down (A, b) by 257 in GF(q). This should scale e down to [-1, 0, 1] and should help LLL to find it.
 
 ```python
 for x in range(n):
