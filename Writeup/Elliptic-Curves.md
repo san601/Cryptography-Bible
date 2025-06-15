@@ -55,7 +55,11 @@ print(decrypt_flag(shared_secret, iv, ciphertext))
 
 Desc: Spent my morning reading up on ECC and now I'm ready to start encrypting my messages. Sent a flag to Bob today, but you'll never read it.
 
-So the parameters for the curve are poorly chosen, we can find n from `A = n * G` and calculate the shared secret between them. Sage have a built-in function to handle it.
+So the parameters for the curve are poorly chosen because the order of the curve composed of many smaller prime (smooth).
+
+![image](https://github.com/user-attachments/assets/62e6228c-8694-44ae-a024-2e9ad0033bcf)
+
+We can find n from `A = n * G` and calculate the shared secret between them. Sage have a built-in function to find n and even speed it up if the curve is smooth. From what I know, it uses a combination of Pohlig-Hellman and baby-step giant-step.
 
 ```python
 from Crypto.Cipher import AES
