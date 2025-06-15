@@ -137,6 +137,7 @@ print("Recovered flag:", flag_bytes.decode('utf-8', errors='ignore'))
 
 This is an example of how primal attack can be used since error is small compared to modulus q. Firstly, we need to construct a lattice, I choose this:
 
+$$
 \( M \in \mathbb{Z}^{n + m + 1 \times m + 1} \):
 
 \[
@@ -157,3 +158,4 @@ q & 0 & \cdots & 0 & 0 \\
 - First row: the `b_i` values and `q` in the last column.
 - Rows 2 to \(n+1\): transposed LWE matrix \( A^T \).
 - Rows \(n+2\) to \(n+1+m\): scaled identity matrix \( q \cdot I_m \) to stabilize the lattice.
+$$
