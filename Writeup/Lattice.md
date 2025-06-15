@@ -143,8 +143,27 @@ which gives us this when apply LLL:
 
 ![image](https://github.com/user-attachments/assets/91ff412d-da96-437a-b3e8-0911986b177b)
 
+But actually, the message is hidden in the low bits of the LWE system.
+
+```python
+def encrypt(m):
+    A = V.random_element()
+    e = randint(-1, 1)
+    b = A * S + m + p * e
+    return A, b
+```
+
+So we need to scale down (A, b) by 257 in GF(q).
+
+```python
+for x in range(n):
+        A[x] = (A[x] * pow(p, -1, q)) % q
+    b = (b * pow(p, -1, q)) % q
+```
+
 Next, reconstruct the secret key S and use the code in LWE Low Bits to solve for the flag.
 
+Solve.py:
 ```python
 from pwn import *
 import json
