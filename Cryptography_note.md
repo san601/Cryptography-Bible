@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/97368f95-aa34-4b61-ac25-dabac53029fb)![image](https://github.com/user-attachments/assets/97368f95-aa34-4b61-ac25-dabac53029fb)![image](https://github.com/user-attachments/assets/09d5ec85-fdb9-4ba4-8fb0-5450a154c99c)![image](https://github.com/user-attachments/assets/09d5ec85-fdb9-4ba4-8fb0-5450a154c99c)# Cryptography
+# Cryptography
 This is my note for NT219.P21.ANTN - Cryptography
 ## Ciphers
 ### Symmetric (DES, AES)
@@ -89,6 +89,18 @@ Let's define addition
 ![image](https://github.com/user-attachments/assets/ed5ad33e-a509-4a0f-abec-863f78700719)
 
 If non-standardized curve is used, the order of the curve can be factored and become 🍌. [For example](https://github.com/san601/Cryptography-Bible/blob/main/Writeup/Elliptic-Curves.md#smooth-criminal)
+
+ECC Cipher
+
+![image](https://github.com/user-attachments/assets/f5ea0592-0015-466f-878a-81d9a9662b04)
+
+ECC Diffie-Hellman (ECDHE)
+
+![image](https://github.com/user-attachments/assets/469dab9e-ba76-4385-a513-a84ad32a2c84)
+
+`Note: secret key is a number, public key is a point on the curve`
+
+This scheme is vulnerable to MITM attack in the next section.
 
 #### Diffie-Hellman exchange protocol
 
