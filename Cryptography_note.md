@@ -5,10 +5,43 @@
 #### AES
 ### Asymmetric (RSA, ElGamar, ECC)
 #### RSA
+
+The RSA is based on Integer factorization Problem
+
+![image](https://github.com/user-attachments/assets/78ad128a-7e16-4375-a094-b3ca59774b53)
+
 #### ElGamar
+
+![image](https://github.com/user-attachments/assets/8e1cdd23-aa83-437d-b882-f3e4fefd1ca8)
+
+This is based on the discrete logarithm problem
+
+![image](https://github.com/user-attachments/assets/194d15a7-9dad-4eac-8a9e-350a1eb1abc5)
+
 #### ECC
 
 If non-standardized curve is used, the order of the curve can be factored and become 🍌. [For example](https://github.com/san601/Cryptography-Bible/blob/main/Writeup/Elliptic-Curves.md#smooth-criminal)
+
+#### Diffie-Hellman exchange protocol
+
+![image](https://github.com/user-attachments/assets/196ec6cb-dfac-44da-a100-a8a562cfd070)
+
+This is based on Diffie-Hellman Problem (DHP):
+
+![image](https://github.com/user-attachments/assets/487afb8a-a34b-4e30-9f3b-c0835595c3cf)
+
+Without authentication, Diffie-Hellman is vulnerable to MITM attack. [A Cryptohack example](https://github.com/san601/Cryptography-Bible/blob/main/Writeup/Diffie-Hellman.md#man-in-the-middle-attack)
+
+![image](https://github.com/user-attachments/assets/2e0a9fe5-72a2-48ab-9d1b-98082df52a94)
+
+So for example we can intercept message from Alice and sent Bob anything we want. Alice's message contains `p, g, A = g^a`. When you are the man in the middle, you can generate a pair of `(m, M = g^m)` and send Bob `M`, after that, send `M` back to Alice. You now have 2 shared key with Alice and Bob without them knowing.
+
+The diagram below shows how the process is done:
+
+```
+Alice --(p, g, A)--> You --(p, g, M)--> Bob
+Alice <--(M)-- You <--(B)-- Bob
+```
 
 ## Hash functions and MACs
 A hash function maps a message of an arbitrary length to a l-bit output. MD5 and SHA-1 are phased out so we focus on SHA-2 and SHA-3
