@@ -16,20 +16,27 @@ From the 128 bit key, 11 separate 128 bit "round keys" are derived: one to be us
 2. Initial key addition: AddRoundKey - the bytes of the first round key are XOR'd with the bytes of the state.
 
 3. Round - this phase is looped 10 times, for 9 main rounds plus one "final round"
-   
- a) SubBytes - each byte of the state is substituted for a different byte according to a lookup table ("S-box").
+- SubBytes - each byte of the state is substituted for a different byte according to a lookup table ("S-box").
+- ShiftRows - the last three rows of the state matrix are transposed—shifted over a column or two or three.
 
- b) ShiftRows - the last three rows of the state matrix are transposed—shifted over a column or two or three.
+![image](https://github.com/user-attachments/assets/d590a4db-6506-481c-890e-3cd43ad7f0ea)
 
- c) MixColumns - matrix multiplication is performed on the columns of the state, combining the four bytes in each column. This is skipped in the final round.
+- MixColumns - matrix multiplication is performed on the columns of the state, combining the four bytes in each column. This is skipped in the final round.
 
- d) AddRoundKey - the bytes of the current round key are XOR'd with the bytes of the state.
+![image](https://github.com/user-attachments/assets/e977c1fb-a7e4-4757-9b07-749a0d08f6e2)
+
+- AddRoundKey - the bytes of the current round key are XOR'd with the bytes of the state.
 
  ![image](https://github.com/user-attachments/assets/ca76bc38-d7ab-48d5-a2a0-bda46d1a23a1)
 
-##### Add round key
+There are modes of operation:
+- ECB: simple but can keep the structure of the original data, ciphertexts are the same if encrypted with the same key.
 
-![image](https://github.com/user-attachments/assets/c0eca7c1-c399-4957-b90b-2f16ca451b31)
+![image](https://github.com/user-attachments/assets/164b1e3a-dc36-4f4f-9b81-ecb34373768c)
+
+- CBC: XOR the plaintext in the first block with an initialization vector (IV), then XOR the ciphertext of the previous block with the plaintext in the new block for the rest (chaining).
+
+![image](https://github.com/user-attachments/assets/71a227d9-6394-4747-974f-8aa6fa2a546e)
 
 
 ### Asymmetric (RSA, ElGamar, ECC)
