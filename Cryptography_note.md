@@ -9,6 +9,8 @@
 #### ECC
 ## Hash functions and MACs
 A hash function maps a message of an arbitrary length to a l-bit output. MD5 and SHA-1 are phased out so we focus on SHA-2 and SHA-3
+
+If you store password as hash values, chances are if the database is leaked, the attacker can use dictionary attack. So password-based authentication alone can be insecure.
 ### SHA-2 (SHA-224, SHA-256, SHA-384, SHA-512)
 SHA-2 processes input blocks sequentially. It divides the message into smaller blocks and process them sequentially, embedding one into the next. (Merkle-Damgard construction)
 
@@ -31,7 +33,16 @@ After n round, it start to Squeeze (take r bit from b bit of the whole state):
 
 The key parameters of SHA-3 are b: state size (b = r + c), r: bitrate (determine how much input data can be processed per round ), c: capacity and the number of round (can be deduced from b).
 
+### HMAC
+![image](https://github.com/user-attachments/assets/32a3f8a1-29cb-4197-85ea-120d281c2f5b)
+
+![image](https://github.com/user-attachments/assets/cfdee0f2-24da-44d1-ae8b-c0e1ac1a0483)
+
+Pros: HMAC is not vulnerable to length extension attacks, unlike certain MACs, especially those based directly on hash functions (like "Hash(message || key)")
+
+Cons: requires secure channel for key exchange, reliance on underlying hash function...
+
 ## Digital Signatures
 ### Discrete logarithm-based
-## ECC-based
+### ECC-based
 ## Digital certificate
