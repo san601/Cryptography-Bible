@@ -1,4 +1,5 @@
-# This is my note for NT219.P21.ANTN-Cryptography
+![image](https://github.com/user-attachments/assets/97368f95-aa34-4b61-ac25-dabac53029fb)![image](https://github.com/user-attachments/assets/97368f95-aa34-4b61-ac25-dabac53029fb)![image](https://github.com/user-attachments/assets/09d5ec85-fdb9-4ba4-8fb0-5450a154c99c)![image](https://github.com/user-attachments/assets/09d5ec85-fdb9-4ba4-8fb0-5450a154c99c)# Cryptography
+This is my note for NT219.P21.ANTN - Cryptography
 ## Ciphers
 ### Symmetric (DES, AES)
 #### DES
@@ -49,11 +50,23 @@ Asymmetric cryptography
 Asymmetric encryption is not more secure than Symmetric encryption, in fact, quantum algorithms can attack RSA and ECC but not AES. It is used to distribute the key of symmetric algorithms and verify the identity of the sender (public key certificate).
 
 But this come with a cost: the runtime of asymmetric encryptions are generally much longer than symmmetric one and the key size are often huge. For example, the security available with a 1024-bit key using asymmetric RSA is considered approximately equal in security to an 80-bit key in a symmetric algorithm.
+
 #### RSA
+The RSA is based on Integer factorization Problem, that is, it relies on the difficulty of the factorisation of the modulus N. If the prime factors can be deduced, then we can calculate the Euler totient of N and thus decrypt the ciphertext.
 
-The RSA is based on Integer factorization Problem
+The public key is an exponent `e` and a modulus `N = p * q` => (N, e). We encrypt a message by calculating `c = m^e mod N`. To decrypt it, we calculate `p = c^d mod N` with `d = e^-1 mod phi(N)` and `phi(N) = (p - 1) * (q - 1)`
 
-![image](https://github.com/user-attachments/assets/78ad128a-7e16-4375-a094-b3ca59774b53)
+With a very small e, RSA is vulnerable because, well, when we calculate `m^e mod N`, there's a chance that `m^e < N` so it can be considered that we didn't use a modular operation at all.
+
+Now what if we use one big prime number instead of two to form N? In that case, `phi(N) = N - 1`.
+
+How to sign with RSA? This [website](https://cryptohack.org/courses/public-key/rsa_starter_6/) explain:
+
+Imagine you write a message `m` . You encrypt this message with your friend's public key: `c = m^e0 mod N0`. To sign this message, you calculate the hash of the message: `H(m)` and encrypt this with your private key `S = H(m)^d1 mod N1`
+
+Your friend can decrypt the message using their private key `m = c^d0 mod N0`. Using your public key they calculate `s = S^e1 mod N1`.
+
+Now he just need to compute `H(m)` and compare it to `s` to ensure that the message you sent them, is the message that they received.
 
 #### ElGamar
 
@@ -64,6 +77,16 @@ This is based on the discrete logarithm problem
 ![image](https://github.com/user-attachments/assets/194d15a7-9dad-4eac-8a9e-350a1eb1abc5)
 
 #### ECC
+
+![image](https://github.com/user-attachments/assets/021b3df0-eab8-4c57-be5a-392b53135de0)
+
+P is the modulus of the finite field Fp over which the curve is defined. In this picture, p = 7. P-256 is equivalent to AES-128, P-512 is equivalent to AES-256.
+
+Let's define addition
+
+![image](https://github.com/user-attachments/assets/c890d0b0-f10f-416c-91b5-19da4d8699d8)
+
+![image](https://github.com/user-attachments/assets/ed5ad33e-a509-4a0f-abec-863f78700719)
 
 If non-standardized curve is used, the order of the curve can be factored and become 🍌. [For example](https://github.com/san601/Cryptography-Bible/blob/main/Writeup/Elliptic-Curves.md#smooth-criminal)
 
@@ -178,6 +201,8 @@ In the Presentation layer (receive data from Application layer), TLS will add a 
 ![image](https://github.com/user-attachments/assets/ae6f7592-6809-47a2-82f7-cfbb307c981d)
 
 The reason we choose Presentation layer is because this implementation can be integrated into any application without modifying the application itself.
+
+### Propose a secure network communication scenario
 
 ## Post-quantum cryptography (PQC)
 To be updated
