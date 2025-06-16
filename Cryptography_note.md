@@ -29,6 +29,8 @@ From the 128 bit key, 11 separate 128 bit "round keys" are derived: one to be us
 
  ![image](https://github.com/user-attachments/assets/ca76bc38-d7ab-48d5-a2a0-bda46d1a23a1)
 
+`Note: The ShiftRows and MixColumns work together to ensure every byte affects every other byte in the state within just two rounds. This creates non-linearity and stop cryptanalysts to attack each byte position in the state matrix separately.`
+
 There are modes of operation:
 - ECB: simple but can keep the structure of the original data, ciphertexts are the same if encrypted with the same key.
 
