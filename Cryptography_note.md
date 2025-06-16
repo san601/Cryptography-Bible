@@ -2,7 +2,36 @@
 ## Ciphers
 ### Symmetric (DES, AES)
 #### DES
+- Data are encrypted in 64-bit blocks using a 56-bit key
+- The algorithm transforms 64-bit input in a series of steps into a 64-bit output
+- The same steps, with the same key, are used to reverse the encryption
+
+![image](https://github.com/user-attachments/assets/48a0e324-0324-4fc0-b307-4daf0dc44ed1)
+
 #### AES
+Overview of AES:
+1. KeyExpansion or Key Schedule:
+From the 128 bit key, 11 separate 128 bit "round keys" are derived: one to be used in each AddRoundKey step.
+
+2. Initial key addition: AddRoundKey - the bytes of the first round key are XOR'd with the bytes of the state.
+
+3. Round - this phase is looped 10 times, for 9 main rounds plus one "final round"
+   
+ a) SubBytes - each byte of the state is substituted for a different byte according to a lookup table ("S-box").
+
+ b) ShiftRows - the last three rows of the state matrix are transposed—shifted over a column or two or three.
+
+ c) MixColumns - matrix multiplication is performed on the columns of the state, combining the four bytes in each column. This is skipped in the final round.
+
+ d) AddRoundKey - the bytes of the current round key are XOR'd with the bytes of the state.
+
+ ![image](https://github.com/user-attachments/assets/ca76bc38-d7ab-48d5-a2a0-bda46d1a23a1)
+
+##### Add round key
+
+![image](https://github.com/user-attachments/assets/c0eca7c1-c399-4957-b90b-2f16ca451b31)
+
+
 ### Asymmetric (RSA, ElGamar, ECC)
 Asymmetric cryptography
 - Key distribution: How to have secure communications in general without having to trust a KDC with your key
