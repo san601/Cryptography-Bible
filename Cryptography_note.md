@@ -13,7 +13,6 @@ If non-standardized curve is used, the order of the curve can be factored and be
 ## Hash functions and MACs
 A hash function maps a message of an arbitrary length to a l-bit output. MD5 and SHA-1 are phased out so we focus on SHA-2 and SHA-3
 
-If you store password as hash values, chances are if the database is leaked, the attacker can use dictionary attack. So password-based authentication alone can be insecure.
 ### SHA-2 (SHA-224, SHA-256, SHA-384, SHA-512)
 SHA-2 processes input blocks sequentially. It divides the message into smaller blocks and process them sequentially, embedding one into the next. (Merkle-Damgard construction)
 
@@ -55,14 +54,50 @@ Risk:
 #### Authentication
 - Authentication: "Verifying the identity of a user, process, or device, often as a prerequisite to allowing access to resources in an information system."
 - Authorization: "The right or a permission that is granted to a system entity to access a system resource."
-Goal: Users authenticate Server (digital cert/pre-shared secret), Server authenticate Users (challenge response authentication)
 
+Goal: Users authenticate Server (digital cert/pre-shared secret), Server authenticate Users (challenge response authentication
+
+##### Certificate-based authentication
+X.509 certificate includes the below elements:
+
+- The public key
+- The user or device’s name
+- The name of the Certificate Authority (CA) that issued the certificate
+- The date from which the certificate is valid
+- The expiry date of the certificate
+- The version number of the certificate data
+- A serial number
+
+![image](https://github.com/user-attachments/assets/2b8895ea-f764-4643-ab58-9ee497de2cb0)
+
+##### Password-based authentication
+If you store password as hash values, chances are if the database is leaked, the attacker can use dictionary attack. So password-based authentication alone can be insecure.
+
+![image](https://github.com/user-attachments/assets/6eafa626-b3d0-4e80-84fc-9636235d3ce4)
 
 #### Cryptographic algorithm negotiation
-#### Key agreement
-#### Secure protocol implementation
+Cryptographic failure happen when in the negotiation step, one side choose an outdated or insecure algorithm and the other side agree with it (downgrade attack). For example this [Cryptohack challenge](https://github.com/san601/Cryptography-Bible/blob/main/Writeup/Diffie-Hellman.md#export-grade).
 
-## Digital Signatures
-### Discrete logarithm-based
-### ECC-based
-## Digital certificate
+#### Key agreement
+
+![image](https://github.com/user-attachments/assets/4dc16500-6a03-4701-83c2-759cc04e58ec)
+
+Now User can verify Server using "tag", but how can Server vefify User?
+
+##### Authenticate user/end device
+Remember when I said that storing password hash alone is no longer secure because of the dictionary attack? It's time to use 2FA/MFA (biometric, smartcard, hardware-assisted, ...):
+- Use OTP = H(sk, T) (through negotiation, DO NOT use SMS (SIM hijacking is a huge threat)
+- Use smartcard (vincss fido2), masterkey with NFC
+- Security module
+
+![image](https://github.com/user-attachments/assets/b8cbcecc-da36-4ddd-8b0c-2693bf42929c)
+
+#### Secure protocol implementation
+In the Presentation layer (receive data from Application layer), TLS will add a TLS header into the packet
+
+![image](https://github.com/user-attachments/assets/ae6f7592-6809-47a2-82f7-cfbb307c981d)
+
+The reason we choose Presentation layer is because this implementation can be integrated into any application without modifying the application itself.
+
+## Post-quantum cryptography (PQC)
+To be updated
