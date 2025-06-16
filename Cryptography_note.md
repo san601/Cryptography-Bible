@@ -134,6 +134,18 @@ SHA-2 processes input blocks sequentially. It divides the message into smaller b
 
 ![image](https://github.com/user-attachments/assets/e26fe051-c5bd-4e35-aae3-d31afff8b63e)
 
+For example, this is the preprocessing step.
+
+![image](https://github.com/user-attachments/assets/8f861f9c-74bb-414a-a26a-c0e5b922e2c1)
+
+After this, a bunch of operations happen. At the end of the loop, the hash values will be updated with results from the current block and start again until there are no blocks left.
+
+```python
+H = [(old + new) & 0xffffffff for old, new in zip(H, [a, b, c, d, e, f, g, h_var])]
+```
+
+For more information, please refer to the actual implementation of SHA-2.
+
 The security parameters of SHA-2 are primarily determined by the length of the hash output, with options including 224, 256, 384, and 512 bits. These different output lengths offer varying levels of security, with longer outputs generally providing stronger resistance against attacks. 
 
 But the Merkle-Damgard structure is what make SHA-1 and SHA-2 vulnerable to length extension attack. 
