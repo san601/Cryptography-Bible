@@ -4,6 +4,13 @@
 #### DES
 #### AES
 ### Asymmetric (RSA, ElGamar, ECC)
+Asymmetric cryptography
+- Key distribution: How to have secure communications in general without having to trust a KDC with your key
+- Digital signatures: How to verify that a message comes intact from the claimed sender
+
+Asymmetric encryption is not more secure than Symmetric encryption, in fact, quantum algorithms can attack RSA and ECC but not AES. It is used to distribute the key of symmetric algorithms and verify the identity of the sender (public key certificate).
+
+But this come with a cost: the runtime of asymmetric encryptions are generally much longer than symmmetric one and the key size are often huge. For example, the security available with a 1024-bit key using asymmetric RSA is considered approximately equal in security to an 80-bit key in a symmetric algorithm.
 #### RSA
 
 The RSA is based on Integer factorization Problem
@@ -29,6 +36,8 @@ If non-standardized curve is used, the order of the curve can be factored and be
 This is based on Diffie-Hellman Problem (DHP):
 
 ![image](https://github.com/user-attachments/assets/487afb8a-a34b-4e30-9f3b-c0835595c3cf)
+
+The "hard problem" in Diffie-Hellman key exchange refers to the difficulty of computing the shared secret key (g^(ab)) given the public values (g^a) and (g^b), and the generator (g)
 
 Without authentication, Diffie-Hellman is vulnerable to MITM attack. [A Cryptohack example](https://github.com/san601/Cryptography-Bible/blob/main/Writeup/Diffie-Hellman.md#man-in-the-middle-attack)
 
