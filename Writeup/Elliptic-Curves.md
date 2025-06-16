@@ -55,7 +55,7 @@ print(decrypt_flag(shared_secret, iv, ciphertext))
 
 Desc: Spent my morning reading up on ECC and now I'm ready to start encrypting my messages. Sent a flag to Bob today, but you'll never read it.
 
-So the parameters for the curve are poorly chosen because the order of the curve composed of many smaller prime (smooth).
+So the parameters for the curve are poorly chosen because the order of the curve can be factored into many smaller prime (smooth).
 
 ![image](https://github.com/user-attachments/assets/62e6228c-8694-44ae-a024-2e9ad0033bcf)
 
