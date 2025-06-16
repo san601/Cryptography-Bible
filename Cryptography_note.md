@@ -125,6 +125,7 @@ Alice --(p, g, A)--> You --(p, g, M)--> Bob
 Alice <--(M)-- You <--(B)-- Bob
 ```
 
+We need to verify who send us the message, which will be covered in the next section.
 ## Hash functions and MACs
 A hash function maps a message of an arbitrary length to a l-bit output. MD5 and SHA-1 are phased out so we focus on SHA-2 and SHA-3
 
@@ -215,6 +216,13 @@ In the Presentation layer (receive data from Application layer), TLS will add a 
 The reason we choose Presentation layer is because this implementation can be integrated into any application without modifying the application itself.
 
 ### Propose a secure network communication scenario
+Key agreement:
+- Use AES to encrypt data
+- Use RSA/ECC/Elgama/Diffie Hellman to exchange AES key
+- Add tag, certificate
 
+End node authentication:
+- Verify certificate with public key root trusted CA
+- User verify public key from server
 ## Post-quantum cryptography (PQC)
 To be updated
