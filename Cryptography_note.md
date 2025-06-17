@@ -144,6 +144,8 @@ After this, a bunch of operations happen. At the end of the loop, the hash value
 H = [(old + new) & 0xffffffff for old, new in zip(H, [a, b, c, d, e, f, g, h_var])]
 ```
 
+SHA-256 and SHA-224 use 64 rounds, while SHA-512 and SHA-384 use 80 rounds. Each round involves bitwise operations, additions, and rotations, using 32-bit words in SHA-256 and 64-bit words in SHA-512.
+
 For more information, please refer to the actual implementation of SHA-2.
 
 The security parameters of SHA-2 are primarily determined by the length of the hash output, with options including 224, 256, 384, and 512 bits. These different output lengths offer varying levels of security, with longer outputs generally providing stronger resistance against attacks. 
@@ -155,11 +157,15 @@ But the Merkle-Damgard structure is what make SHA-1 and SHA-2 vulnerable to leng
 ### SHA-3
 SHA-3 uses a sponge construction, instead of the Cipher Block Chaining mode of repeated compressions (each plaintext block is XORed with the previous ciphertext block before being encrypted) used by SHA-1, SHA-2, and Whirlpool. This is what make it resistant to length extension attack.
 
-It use Absorb:
+It use Absorb (24 rounds rounds, each round consists of these five functions θ, ρ, π, χ and ι, these rounds working on the full set of the state (1600 bits))
+
 ![image](https://github.com/user-attachments/assets/24e80995-222e-4fe6-b521-5e4403a446ac)
 
-After n round, it start to Squeeze (take r bit from b bit of the whole state):
+After 24 rounds, it start to Squeeze (take `r` bit from 1600 bits of the state):
+
 ![image](https://github.com/user-attachments/assets/254082c7-f3d4-4c57-a5fa-0e0b4a0c0430)
+
+And then it take `n` bit from `r` (based on the length of the output), that's the digest we want.
 
 The key parameters of SHA-3 are b: state size (b = r + c), r: bitrate (determine how much input data can be processed per round ), c: capacity and the number of round (can be deduced from b).
 
