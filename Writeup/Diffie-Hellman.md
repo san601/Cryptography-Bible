@@ -55,6 +55,7 @@ You now have the shared key between Alice and Bob. Next, process to decrypt the 
 
 ### Static Client
 We can give Bob p, g, A and Bob will use those parameters to calculate his g ^ b
+
 I tried to give Bob `g = 0x01` and `A = 0x01` so that Bob returned me this:
 
 ```
@@ -145,6 +146,96 @@ print(decrypt_flag(shared_secret, iv, ciphertext))
 ```
 
 ![image](https://github.com/user-attachments/assets/47da88f0-574c-4e44-9397-6ed3728d8138)
+
+### Additive
+Desc: Alice and Bob decided to do their DHKE in an additive group rather than a multiplicative group. What could go wrong?
+
+So instead of 
+
+```
+A = g^a (mod p)
+B = g^b (mod p)
+key = B^a = A^b = g^(a*b) (mod p)
+```
+
+It is now 
+```
+A = g*a (mod p)
+B = g*b (mod p)
+key = A*b = B*a = g*a*b (mod p)
+```
+
+To find shared secret, we need to have `a` or `b`. Because this is in (G, +), we just have to calculate mod inverse of g instead of using discrete_log()
+
+```python
+ginv = pow(g, -1, p)
+a = (A * ginv) % p
+shared_secret = B * a % p
+```
+
+solve.py
+```python
+from pwn import * # pip install pwntools
+import json
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import hashlib
+
+
+HOST = "socket.cryptohack.org"
+PORT = 13380
+
+r = remote(HOST, PORT, level='debug')
+
+def json_recv():
+    line = r.readline()
+    return json.loads(line.decode())
+
+def json_send(hsh):
+    request = json.dumps(hsh).encode()
+    r.sendline(request)
+
+def is_pkcs7_padded(message):
+    padding = message[-message[-1]:]
+    return all(padding[i] == len(padding) for i in range(0, len(padding)))
+
+
+def decrypt_flag(shared_secret: int, iv: str, ciphertext: str):
+    # Derive AES key from shared secret
+    sha1 = hashlib.sha1()
+    sha1.update(str(shared_secret).encode('ascii'))
+    key = sha1.digest()[:16]
+    # Decrypt flag
+    ciphertext = bytes.fromhex(ciphertext)
+    iv = bytes.fromhex(iv)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    plaintext = cipher.decrypt(ciphertext)
+
+    if is_pkcs7_padded(plaintext):
+        return unpad(plaintext, 16).decode('ascii')
+    else:
+        return plaintext.decode('ascii')
+
+r.recvuntil(b'Intercepted from Alice: ')
+alice = json_recv()
+p, g, A = int(alice['p'], 16), int(alice['g'], 16), int(alice['A'], 16)
+
+r.recvuntil(b'Intercepted from Bob: ')
+bob = json_recv()
+B = int(bob['B'], 16)
+
+ginv = pow(g, -1, p)
+a = (A * ginv) % p
+shared_secret = B * a % p
+
+r.recvuntil(b'Intercepted from Alice: ')
+secret_flag = json_recv()
+iv, encrypted = secret_flag['iv'], secret_flag['encrypted']
+print(decrypt_flag(shared_secret, iv, encrypted))
+```
+
+Result:
+![image](https://github.com/user-attachments/assets/1801ce4a-016b-4220-a44f-bf414016046b)
 
 ### Script Kiddie
 Everything is correct except for:
