@@ -41,10 +41,6 @@ There are modes of operation:
 
 ![image](https://github.com/user-attachments/assets/71a227d9-6394-4747-974f-8aa6fa2a546e)
 
-- CTR:
-
-![image](https://github.com/user-attachments/assets/050b28b3-71fa-4851-a808-eda3185938d3)
-
 - CFB
 
 ![image](https://github.com/user-attachments/assets/deb09902-3f97-4d02-9060-0b02e262b764)
@@ -52,6 +48,10 @@ There are modes of operation:
 - OFB
 
 ![image](https://github.com/user-attachments/assets/73d550a4-9f97-4a83-a54d-766df5f6eaa0)
+
+- CTR:
+
+![image](https://github.com/user-attachments/assets/050b28b3-71fa-4851-a808-eda3185938d3)
 
 - GCM: based on CTR, add a tag to provide both data confidentiality and authenticity.
 
