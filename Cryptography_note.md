@@ -193,6 +193,8 @@ Pros: HMAC is not vulnerable to length extension attacks, unlike certain MACs, e
 
 Cons: requires secure channel for key exchange, reliance on underlying hash function...
 
+`Note: From what I understand, using length extension on HMAC can only change the outer hash, not the actual message inside. As long as the original one is kept safe, we can know whether the message that the other side receive is our message or not.
+
 ## Cryptography Application
 Scenario: Network system
 
