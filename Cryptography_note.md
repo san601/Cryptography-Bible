@@ -41,6 +41,13 @@ There are modes of operation:
 
 ![image](https://github.com/user-attachments/assets/71a227d9-6394-4747-974f-8aa6fa2a546e)
 
+- CTR:
+
+![image](https://github.com/user-attachments/assets/050b28b3-71fa-4851-a808-eda3185938d3)
+
+- GCM: based on CTR
+
+![image](https://github.com/user-attachments/assets/20dc94f6-3f53-4577-b4b9-f9e221985c36)
 
 ### Asymmetric (RSA, ElGamar, ECC)
 Asymmetric cryptography
