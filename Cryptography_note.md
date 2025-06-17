@@ -45,9 +45,17 @@ There are modes of operation:
 
 ![image](https://github.com/user-attachments/assets/050b28b3-71fa-4851-a808-eda3185938d3)
 
-- GCM: based on CTR
+- CFB
 
-![image](https://github.com/user-attachments/assets/20dc94f6-3f53-4577-b4b9-f9e221985c36)
+![image](https://github.com/user-attachments/assets/deb09902-3f97-4d02-9060-0b02e262b764)
+ 
+- OFB
+
+![image](https://github.com/user-attachments/assets/73d550a4-9f97-4a83-a54d-766df5f6eaa0)
+
+- GCM: based on CTR, add a tag to provide both data confidentiality and authenticity.
+
+![image](https://github.com/user-attachments/assets/0b218a76-6acf-41a4-b49c-b8ac92f2403e)
 
 ### Asymmetric (RSA, ElGamar, ECC)
 Asymmetric cryptography
