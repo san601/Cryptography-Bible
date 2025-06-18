@@ -18,6 +18,9 @@ From the 128 bit key, 11 separate 128 bit "round keys" are derived: one to be us
 
 3. Round - this phase is looped 10 times, for 9 main rounds plus one "final round"
 - SubBytes - each byte of the state is substituted for a different byte according to a lookup table ("S-box").
+
+`Note: SubBytes was designed to have a low correlation between input bits and output bits and the property that the output is not a linear mathematical function of the input`
+
 - ShiftRows - the last three rows of the state matrix are transposed—shifted over a column or two or three.
 
 ![image](https://github.com/user-attachments/assets/d590a4db-6506-481c-890e-3cd43ad7f0ea)
@@ -25,6 +28,8 @@ From the 128 bit key, 11 separate 128 bit "round keys" are derived: one to be us
 - MixColumns - matrix multiplication is performed on the columns of the state, combining the four bytes in each column. This is skipped in the final round.
 
 ![image](https://github.com/user-attachments/assets/e977c1fb-a7e4-4757-9b07-749a0d08f6e2)
+
+`Note: ShiftRows, along with MixColumns, create a transformation where the 4 bytes of one column are spread out to four different columns. Those 2 ensure that after a few rounds all output bits depend on all input bits.`
 
 - AddRoundKey - the bytes of the current round key are XOR'd with the bytes of the state.
 
