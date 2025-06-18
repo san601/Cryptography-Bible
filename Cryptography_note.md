@@ -54,9 +54,13 @@ There are modes of operation:
 
 ![image](https://github.com/user-attachments/assets/73d550a4-9f97-4a83-a54d-766df5f6eaa0)
 
+`Note: bit errors in transmission do not propagate (can be used over noisy channel like satellite communication.`
+
 - CTR:
 
 ![image](https://github.com/user-attachments/assets/050b28b3-71fa-4851-a808-eda3185938d3)
+
+`Note: can leverage parallel computing -> fast`
 
 - GCM: based on CTR, add a tag to provide both data confidentiality and authenticity.
 
