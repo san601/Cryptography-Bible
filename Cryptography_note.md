@@ -193,7 +193,67 @@ Pros: HMAC is not vulnerable to length extension attacks, unlike certain MACs, e
 
 Cons: requires secure channel for key exchange, reliance on underlying hash function...
 
-`Note: From what I understand, using length extension on HMAC can only change the outer hash, not the actual message inside. As long as the original one is kept safe, we can know whether the message that the other side receive is our message or not.
+`Note: From what I understand, using length extension on HMAC can only change the outer hash, not the actual message inside. As long as the original one is kept safe, we can know whether the message that the other side receive is our message or not.`
+
+## Digital signature
+`Note: the cost to compute digital signature is kinda big so it's not widely used like HMAC (like on devices with limited resources like IoT). Digital signature is not going to replace HMAC but it will be used in situation where you can't use HMAC (like when you need non-repudiation, HMAC with a single key can't provide you that)`
+
+Main step of digital signature algorithms:
+![image](https://github.com/user-attachments/assets/e9b90bc5-07a5-4b88-ad62-314e835ab8bc)
+
+### RSASSA Signatures
+
+### Digital Signature Algorithm
+```
+Key gen:
+n bit prime q, 512-1024 bit prime p, (q-1) % p = 0 (public)
+x in [1, q-1] (secret key) 
+y = g^x (public key)
+
+Signing:
+r = (g^k mod p) mod q
+s = k^-1 * (H(m) + x*r) mod q
+
+Verify:
+w = s^-1 mod q = k*(H(m) + x*r)^-1 mod q
+u1 = H(m') * w mod q
+u2 = r * w mod q
+Check (g^u1 * y^u2 mod p) mod q = g^u1 * g^x*u2
+
+We have u1 + x*u2 = H(m') * k*(H(m) + x*r)^-1 + x*r*k*(H(m) + x*r)^-1
+= k*(H(m) + x*r)^-1 * (H(m') + x*r)
+= k (if m == m')
+g^k = r
+
+So we just need to check whether g^u1 * y*u2 = r or not
+```
+
+![image](https://github.com/user-attachments/assets/cac5ada5-6aed-4870-8356-86e325cf58ca)
+
+### Elliptic Curve Digital Signature Algorithm
+
+```
+n = ord(G)
+order is the smallest number that nG = 0, in other words, n is the number of point on the curve
+key generation:
+d in [1, n-1] (secret)
+Q = dG in E(Zp) (public)
+Signing:
+Choose k in [1, n-1]
+R = kG = (x1, y1), r = x1
+s = k^-1(H(m) + d*r) mod n
+signature (r, s)
+Verify:
+w = s^-1 mod n = k*(H(m) + d*r) mod n
+u1 = H(m') * w mod n = H(m') * k*(H(m) + d*r)^-1 mod n
+u2 = r * w mod n = r * k*(H(m) + d*r)^-1 mod n
+
+Verify v = u1*G + u2*Q mod n
+= u1*G + u2*d*G = (u1 + u2*d)G mod n
+= (H(m') * k*(H(m) + d*r)^-1 + r * d * k*(H(m) + d*r)^-1) * G mod n
+= k*(H(m) + d*r)^-1 * (H(m') + r*d) * G mod n
+= kG (if m == m')
+```
 
 ## Cryptography Application
 Scenario: Network system
