@@ -71,7 +71,7 @@ The RSA is based on Integer factorization Problem, that is, it relies on the dif
 
 The public key is an exponent `e` and a modulus `N = p * q` => (N, e). We encrypt a message by calculating `c = m^e mod N`. To decrypt it, we calculate `p = c^d mod N` with `d = e^-1 mod phi(N)` and `phi(N) = (p - 1) * (q - 1)`
 
-With a very small e, RSA is vulnerable because, well, when we calculate `m^e mod N`, there's a chance that `m^e < N` so it can be considered that we didn't use a modular operation at all.
+With a very small e, RSA is vulnerable. Check this [link](https://ir0nstone.gitbook.io/crypto/rsa/public-exponent-attacks/small-e) out.
 
 Now what if we use one big prime number instead of two to form N? In that case, `phi(N) = N - 1`.
 
