@@ -3,7 +3,7 @@ This is my note for NT219.P21.ANTN - Cryptography
 ## Ciphers
 ### Symmetric (DES, AES)
 
-A public-key encryption scheme has six ingredients:
+A symmetric encryption scheme has five ingredients:
 - Plaintext: This is the original intelligible message or data that is fed into the algorithm as input.
 - Encryption algorithm: The encryption algorithm performs various substitutions and transformations on the plaintext.
 - Secret key: he secret key is also input to the encryption algorithm. The key is a value independent of the plaintext and of the algorithm. The algorithm will  produce a different output depending on the specific key being used at the time. The exact substitutions and transformations performed by the  algorithm depend on the key.
