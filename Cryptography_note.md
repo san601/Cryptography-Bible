@@ -2,6 +2,14 @@
 This is my note for NT219.P21.ANTN - Cryptography
 ## Ciphers
 ### Symmetric (DES, AES)
+
+A public-key encryption scheme has six ingredients:
+- Plaintext: This is the original intelligible message or data that is fed into the algorithm as input.
+- Encryption algorithm: The encryption algorithm performs various substitutions and transformations on the plaintext.
+- Secret key: he secret key is also input to the encryption algorithm. The key is a value independent of the plaintext and of the algorithm. The algorithm will  produce a different output depending on the specific key being used at the time. The exact substitutions and transformations performed by the  algorithm depend on the key.
+- Ciphertext: This is the scrambled message produced as output. It depends on the plaintext and the key. For a given message, two different keys will produce two different ciphertexts.
+- Decryption algorithm: This is essentially the encryption algorithm run in reverse. it accepts the ciphertext and the matching key and produces the original plaintext.
+
 #### DES
 - Data are encrypted in 64-bit blocks using a 56-bit key
 - The algorithm transforms 64-bit input in a series of steps into a 64-bit output
@@ -74,6 +82,13 @@ Asymmetric cryptography
 Asymmetric encryption is not more secure than Symmetric encryption, in fact, quantum algorithms can attack RSA and ECC but not AES. It is used to distribute the key of symmetric algorithms and verify the identity of the sender (public key certificate).
 
 But this come with a cost: the runtime of asymmetric encryptions are generally much longer than symmmetric one and the key size are often huge. For example, the security available with a 1024-bit key using asymmetric RSA is considered approximately equal in security to an 80-bit key in a symmetric algorithm.
+
+A public-key encryption scheme has six ingredients:
+- Plaintext: This is the readable message or data that is fed into the algorithm as input.
+- Encryption algorithm: The encryption algorithm performs various transformations on the plaintext.
+- Private and public keys: This is a pair of keys that have been selected so that if one is used for encryption, the other is used for decryption. The exact transformations performed by the algorithm depend on the public or private key that is provided as input.
+- Ciphertext: This is the encrypted message produced as output. It depends on the plaintext and the key. For a given message, two different keys will produce two different ciphertexts.
+- Decryption algorithm: This algorithm accepts the ciphertext and the matching key and produces the original plaintext.
 
 #### RSA
 The RSA is based on Integer factorization Problem, that is, it relies on the difficulty of the factorisation of the modulus N. If the prime factors can be deduced, then we can calculate the Euler totient of N and thus decrypt the ciphertext.
