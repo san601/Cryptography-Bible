@@ -1,0 +1,102 @@
+{   
+	"version": "2.0.0", 
+    "tasks": [ 
+        { 
+            "type": "shell", 
+            "label": "C/C++: g++.exe build active file", 
+            "command": "C:\\msys64\\mingw64\\bin\\g++.exe", // thay 3 compiler
+            "args": [ 
+				"-g2", // optimal
+				"-O3", // optimal
+				"-DNDEBUG", // debug or release	
+				"${file}", 
+				"-o", 
+				"${fileDirname}\\${fileBasenameNoExtension}.exe", // output file
+				"-D_WIN32_WINNT=0x0501", // windows version
+				"-lpthread", // parallel
+				"-LD:\\cryptolibrary\\libs\\cryptopp\\gcc", // libraries directory
+				"-l:libcryptopp.a", // -lcryptopp thay gi lay do (.a hoac .so)
+				"-ID:\\cryptolibrary\\include", // header file directory
+				"-Wall" // warning
+            ], 
+            "options": { 
+                "cwd": "C:\\msys64\\mingw64\\bin" 
+            }, 
+			"problemMatcher": [ 
+				"$gcc" 
+			], 
+			"group": { 
+				"kind": "build", 
+				"isDefault": true 
+			}, 
+			"detail": "compiler: C:\\msys64\\mingw64\\bin\\g++.exe" 
+		},
+		{ 
+            "type": "shell", 
+            "label": "C/C++: clang.exe build active file", 
+            "command": "C:\\msys64\\mingw64\\bin\\clang++.exe", // thay 3 compiler
+            "args": [ 
+				"-g2", // optimal
+				"-O3", // optimal
+				"-DNDEBUG", // debug or release	
+				"${file}", 
+				"-o", 
+				"${fileDirname}\\${fileBasenameNoExtension}.exe", // output file
+				"-D_WIN32_WINNT=0x0501", // windows version
+				"-lpthread", // parallel
+				"-LD:\\cryptolibrary\\libs\\cryptopp\\clang", // libraries directory
+				"-l:libcryptopp.a", // -lcryptopp thay gi lay do (.a hoac .so)
+				"-ID:\\cryptolibrary\\include", // header file directory
+				"-Wall" // warning
+            ], 
+            "options": { 
+                "cwd": "C:\\msys64\\mingw64\\bin" 
+            }, 
+			"problemMatcher": [ 
+				"$gcc" 
+			], 
+			"group": { 
+				"kind": "build", 
+				"isDefault": true 
+			}, 
+			"detail": "compiler: C:\\msys64\\mingw64\\bin\\clang.exe" 
+		},
+		{ 
+            "type": "shell", 
+            "label": "C/C++: cl.exe build active file", 
+            "command": "\"C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvars64.bat\" && cl", // Open visual studio prompt x64 and run cl
+			"args": [
+				"/Zc:wchar_t",
+				"/Zc:inline",
+				"/Gm-", // Enable minimal rebuild
+				"/Gd", // Default calling convention
+				"/FC", // Show full path when diagnose
+                "/MTd",  // Link to static libraries
+                "/GS",  // Enable security checks
+                "/Oi",  // Optimize code for maximum speed
+                "/W4",  // Set warning level to 4
+                "/Zi",  // Generate complete debugging information
+                "/nologo",  // Suppress startup banner
+                "/EHsc",  // Enable C++ exception handling
+                "/ID:\\cryptolibrary\\include",  // Include directory
+                "${file}",  // Input source file
+                "/link", // feed to linker
+                "/OUT:${fileDirname}\\${fileBasenameNoExtension}.exe",  // Output file name
+                "/LIBPATH:D:\\cryptolibrary\\libs\\cryptopp\\msvc",  // Library path
+                "cryptlib.lib",  // Link with cryptlib.lib
+                "/MACHINE:X64"  // Target a 64-bit machine
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: cl.exe"
+		} 
+	] 
+} 

@@ -1,0 +1,10 @@
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\bin\Debug\AES-CryptoPP-GUI.exe.config
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\bin\Debug\AES-CryptoPP-GUI.exe
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\bin\Debug\AES-CryptoPP-GUI.pdb
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES-CryptoPP-GUI.csproj.AssemblyReference.cache
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES_CryptoPP_GUI.Form1.resources
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES_CryptoPP_GUI.Properties.Resources.resources
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES-CryptoPP-GUI.csproj.GenerateResource.cache
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES-CryptoPP-GUI.csproj.CoreCompileInputs.cache
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES-CryptoPP-GUI.exe
+D:\Repository\Crypto\AES-CryptoPP-GUI\AES-CryptoPP-GUI\obj\Debug\AES-CryptoPP-GUI.pdb

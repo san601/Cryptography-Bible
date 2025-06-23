@@ -1,0 +1,97 @@
+Nhắc các bạn nôpj bài Lab1,2,3
+Link:
+https://docs.google.com/forms/d/e/1FAIpQLSeyIlyt10KDyfHsGUYyEGygYVOkKrY9YLZ-UgSn_bEv-dBLiQ/viewform
+Deadline: 17/6/2023
+Lab 1: Coding DES, AES using cryptopp library
+A. Required:
++) Mode of operations:
+  - Select mode from screen (using switch case)
+  - Support modes:  ECB, CBC, OFB, CFB, CTR, XTS, CCM, GCM.
++) Funtions: Key generation, encryption, decryption function:
+   Select from screen (using command-line or GUI)
++) Inputs:
+  - Secret key,  Initialization Vector IV, and nonce,..
+  Select from screen (using command-line or GUI)
+  Case 1: Secret key and IV are randomly chosen for each run time
+  Case 2: Input Secret Key and IV from file (using file name/)
+ - Plaintext
+    Case 1: Input from screen;
+    Case 2: From files (using file name);
+    - Support Vietnamse (using setmode, UTF-8)
+ - Ciphertext
+    Case 1: Input from screen;
+    Case 2: From files (using file name);
+    - Support Vietnamese (using setmode, UTF-8)
++) Output (hex/base64 encode, binary):
+   - display in screen;
+   - write to file;
+
+Report Lab 1
+Write your report in word file including:
+  1. Report your hardware resources;
+  2. Report computation performance on Windows and Linux (in tabe with capture image on running your program);
+    - Generate a set of different input sizes (at least 6 inputs in size KBs up to MBs)
+    - Execute your code and check the computation time on average 10 000 running times;
+    - Summarize the results in a tables including: size of input, OS (Windows, Linux), encryption time and decryption time.
+    - Do a comparison and your comments on both input size and OS;
+
+Lab 2: Coding AES using only C++ without other cryptographic external libraries;
+Required:
++) Plaintext:
+    - Input from screen;
+    - Support Vietnamese (using setmode, UTF-8)
++) Mode of operations
+     Using CBC mode
++) Secret key and Initialization Vector (IV)
+     Input Secret Key and IV from screen
+Report Lab 2
+Write your report in word file including:
+  1. Report your hardware resources;
+  2. Report computation performance on Windows and Linux (in tabe with capture image on running your program);
+    - Generate a set of different input sizes (at least 6 inputs in size KBs up to MBs)
+    - Execute your code and check the computation time on average 10 000 running times;
+    - Summarize the results in a tables including: size of input, OS (Windows, Linux), encryption time and decryption time.
+    - Do a comparison and your comments on both input size and OS;
+
+Lab 3: RSA-OAEP Cipher using CryptoPP
+Required:
++) Funtions:Key generation; Encryption; Decryption function (using command-line or GUI)
+1) Key generation
+  Public Key, Privae  Key;
+  Save to files (DER, PEM);
+2) Encryption
++) Plaintext:
+    - Support Vietnamese (UTF-8)
+    - Input from screen or from file (using command-line or GUI)
++) Secret key/public key
+    - The keys load from files (command-line or GUI)
+    - The public key: >= 3072 bits
++) Save to file/ print to screen with diferent format (BIN, HEX, BASE64)
+3) Decryption
++) Ciphertext:
+    - Input from screen or from file (command-line or GUI)
++) Secret key/public key
+    - The keys load from files (command-line or GUI)
+    - The public key: >= 3072 bits
++) Recover text: Save to file/ print to screen
+
+Report Lab 3
+Write your report in word file including:
+  1. Report your hardware resources;
+  2. Report computation performance on Windows and Linux (in table with capture image on running your program);
+    - Generate a set of different input sizes (at least 3 inputs in size KBs up to MBs)
+    - Execute your code and check the computation time on average 10 000 running times;
+    - Summarize the results in a tables including: size of input, OS (Windows, Linux), encryption time and decryption time.
+    - Do a comparison and your comments on both input size and OS;
+
+
+Note for task 1,2,3 implementation in order
+- Implementation the functions, and then export to .dll/.so
+- Using Python/C# to create GUI
+
+C. Submit
+- your codes
+- your compile files
+- your report
+Compress (rar or zip) all in one file with name in the form: Studentnumber-lab1,2,3.rar
+

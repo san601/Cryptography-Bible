@@ -1,0 +1,113 @@
+{   
+	"version": "2.0.0", 
+    "tasks": [
+		{ 
+            "type": "shell", 
+            "label": "C/C++: g++.exe build active file", 
+            "command": "C:\\msys64\\mingw64\\bin\\g++.exe", // thay 3 compiler
+            "args": [ 
+				"-g2", // optimal
+				"-O3", // optimal
+				"-DNDEBUG", // debug or release	
+				"${file}",
+				// "-shared", // create a shared library 
+				"-o", 
+				"${fileDirname}\\${fileBasenameNoExtension}-gcc.exe", // output file
+				"-D_WIN32_WINNT=0x0501", // windows version
+				"-lpthread", // parallel
+				"-LD:\\Repository\\Crypto\\openssl332\\gcc\\lib64", // libraries directory
+				"-l:libcrypto.a", // -lcrypto thay gi lay do (.a hoac .so)
+				"-l:libssl.a",
+				"-lcrypt32",
+				"-lws2_32",
+				"-ID:\\Repository\\Crypto\\openssl332\\gcc\\include", // header file directory
+				"-Wall" // warning	
+            ], 
+            "options": { 
+                "cwd": "C:\\msys64\\mingw64\\bin" 
+            }, 
+			"problemMatcher": [ 
+				"$gcc" 
+			], 
+			"group": { 
+				"kind": "build", 
+				"isDefault": true 
+			}, 
+			"detail": "compiler: C:\\msys64\\mingw64\\bin\\g++.exe" 
+		},
+		{ 
+            "type": "shell", 
+            "label": "C/C++: clang.exe build active file", 
+            "command": "C:\\msys64\\mingw64\\bin\\clang++.exe", // thay 3 compiler
+            "args": [ 
+				"-g2", // optimal
+				"-O3", // optimal
+				"-DNDEBUG", // debug or release	
+				"${file}", 
+				"-shared", // create a shared library
+				"-o", 
+				"${fileDirname}\\${fileBasenameNoExtension}-clang.so", // output file
+				"-D_WIN32_WINNT=0x0501", // windows version
+				"-lpthread", // parallel
+				"-LD:\\Repository\\Crypto\\openssl332\\gcc\\lib64", // libraries directory
+				"-l:libcrypto.a", // -lcrypto thay gi lay do (.a hoac .so)
+				"-l:libssl.a",
+				"-lcrypt32",
+				"-lws2_32",
+				"-ID:\\Repository\\Crypto\\openssl332\\clang\\include", // header file directory
+				"-Wall" // warning
+            ], 
+            "options": { 
+                "cwd": "C:\\msys64\\mingw64\\bin" 
+            }, 
+			"problemMatcher": [ 
+				"$gcc" 
+			], 
+			"group": { 
+				"kind": "build", 
+				"isDefault": true 
+			}, 
+			"detail": "compiler: C:\\msys64\\mingw64\\bin\\clang.exe" 
+		},
+		{ 
+            "type": "shell", 
+            "label": "C/C++: cl.exe build active file", 
+            "command": "\"C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvars64.bat\" && cl", // Open visual studio prompt x64 and run cl
+			"args": [
+				"/Zc:wchar_t",
+				"/Zc:inline",
+				"/Gm-", // Enable minimal rebuild
+				"/Gd", // Default calling convention
+				"/FC", // Show full path when diagnose
+                "/MTd",  // Link to static libraries
+                "/GS",  // Enable security checks
+                "/Oi",  // Optimize code for maximum speed
+                "/W4",  // Set warning level to 4
+				"/LD",  // Create a dynamic-link library
+                "/Zi",  // Generate complete debugging information
+                "/nologo",  // Suppress startup banner
+                "/EHsc",  // Enable C++ exception handling
+				"/DBUILD_DLL",  // Define BUILD_DLL for building a DLL
+                "/ID:\\Repository\\Crypto\\openssl332\\msvc\\include",  // Include directory
+                "${file}",  // Input source file
+                "/link", // feed to linker
+                "/OUT:${fileDirname}\\${fileBasenameNoExtension}-msvc.dll",  // Output file name
+                "/LIBPATH:D:\\Repository\\Crypto\\openssl332\\msvc\\lib",  // Library path
+                "libcrypto.lib",  // Link with cryptlib.lib
+				"libssl.lib",  // Link with ssllib.lib
+                "/MACHINE:X64"  // Target a 64-bit machine
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: cl.exe"
+		} 
+	] 
+}

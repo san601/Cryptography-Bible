@@ -1,0 +1,11 @@
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\bin\Debug\GUI-Lab4.exe.config
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\bin\Debug\GUI-Lab4.exe
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\bin\Debug\GUI-Lab4.pdb
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI-Lab4.csproj.AssemblyReference.cache
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI_Lab4.Form1.resources
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI_Lab4.Properties.Resources.resources
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI-Lab4.csproj.GenerateResource.cache
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI-Lab4.csproj.CoreCompileInputs.cache
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI-Lab4.exe
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI-Lab4.pdb
+D:\Repository\Crypto\Lab\GUI-Lab4\GUI-Lab4\obj\Debug\GUI-Lab4.exe.config
