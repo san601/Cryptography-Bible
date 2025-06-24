@@ -82,43 +82,36 @@ string wstring_to_string (const std::wstring& str);
 #include <fcntl.h>
 #endif
 
+#if defined(_WIN32) || defined(__CYGWIN__)
+  #define EXPORT __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+  #define EXPORT __attribute__ ((visibility ("default")))
+#else
+  #define EXPORT
+#endif
+
+// C-style exports for DLL
+#ifdef __cplusplus
+extern "C" {
+#endif
+ 
+EXPORT void GenerateKey(const char *algo, const int mode, CryptoPP::byte *key, CryptoPP::byte *iv, const char *filename);
+EXPORT void AESEncrypt(const int mode, const char *plaintext, bool saveToFile, const char *output, const CryptoPP::byte *key, const CryptoPP::byte *iv);
+EXPORT void AESDecrypt(const int mode, const CryptoPP::byte *ciphertext, int size, bool saveToFile, const char *output, const CryptoPP::byte *key, const CryptoPP::byte *iv);
+EXPORT void DESEncrypt(const int mode, const char *plaintext, bool saveToFile, const char *output, const CryptoPP::byte *key, const CryptoPP::byte *iv);
+EXPORT void DESDecrypt(const int mode, const CryptoPP::byte *ciphertext, int size, bool saveToFile, const char *output, const CryptoPP::byte *key, const CryptoPP::byte *iv);
+EXPORT void LoadKeyFromFile(const char *algo, const int mode, const char *filename, CryptoPP::byte *key, CryptoPP::byte *iv);
+
+#ifdef __cplusplus
+}
+#endif
+
 const int TAG_SIZE = 12;
 
 using namespace CryptoPP;
 
 wstring string_to_wstring(const string& str);
 string wstring_to_string(const wstring& str);
-
-void GenerateKey(const char *algo, const int mode, CryptoPP::byte *key, CryptoPP::byte *iv) {
-    int default_keylength, blocksize;
-    if (!strcmp(algo, "AES")) 
-    {
-        default_keylength = AES::DEFAULT_KEYLENGTH;
-        blocksize = AES::BLOCKSIZE;
-    }
-    else
-    {
-        default_keylength = DES::DEFAULT_KEYLENGTH;
-        blocksize = DES::BLOCKSIZE;
-    }
-    AutoSeededRandomPool *prng = new AutoSeededRandomPool();
-    if (mode != 6)
-    {
-        if (mode != 7)
-        {
-            prng->GenerateBlock(key, default_keylength);
-            prng->GenerateBlock(iv, blocksize);
-        }
-
-        prng->GenerateBlock(key, default_keylength);
-        prng->GenerateBlock(iv, 12);
-    }
-    else
-    {
-        prng->GenerateBlock(key, default_keylength * 2);
-        prng->GenerateBlock(iv, blocksize);
-    }
-}
 
 void SaveKeyToFile(const char *algo, const int mode, const char *filename, const CryptoPP::byte *key, const CryptoPP::byte *iv) {
     int default_keylength, blocksize;
@@ -151,6 +144,39 @@ void SaveKeyToFile(const char *algo, const int mode, const char *filename, const
     }        
     file.MessageEnd();
     std::wcout << "Key and IV saved to: " << filename << std::endl;
+}
+
+void GenerateKey(const char *algo, const int mode, CryptoPP::byte *key, CryptoPP::byte *iv, const char *filename) {
+    int default_keylength, blocksize;
+    if (!strcmp(algo, "AES")) 
+    {
+        default_keylength = AES::DEFAULT_KEYLENGTH;
+        blocksize = AES::BLOCKSIZE;
+    }
+    else
+    {
+        default_keylength = DES::DEFAULT_KEYLENGTH;
+        blocksize = DES::BLOCKSIZE;
+    }
+    AutoSeededRandomPool *prng = new AutoSeededRandomPool();
+    if (mode != 6)
+    {
+        if (mode != 7)
+        {
+            prng->GenerateBlock(key, default_keylength);
+            prng->GenerateBlock(iv, blocksize);
+        }
+
+        prng->GenerateBlock(key, default_keylength);
+        prng->GenerateBlock(iv, 12);
+    }
+    else
+    {
+        prng->GenerateBlock(key, default_keylength * 2);
+        prng->GenerateBlock(iv, blocksize);
+    }
+    std::string file(filename);
+    SaveKeyToFile(algo, mode, file.c_str(), key, iv);
 }
 
 // Load key and IV from binary file using FileSource and ArraySink
@@ -673,11 +699,7 @@ int main(int argc, char* argv[])
         {
             std::wcout << "File name to save: ";
             std::wcin >> filename;
-            GenerateKey(algo, mode, key, iv);
-
-            std::string file = wstring_to_string(filename);
-            SaveKeyToFile(algo, mode, file.c_str(), key, iv);
-
+            GenerateKey(algo, mode, key, iv, wstring_to_string(filename).c_str());
             break;
         }
         case 2: 
@@ -730,27 +752,7 @@ int main(int argc, char* argv[])
             std::wstring output;
             std::wcout << "Output file: ";
             std::wcin >> output;
-            // Encrypt
-            auto start = std::chrono::high_resolution_clock::now();
-        
-            for (int i = 0; i < 1000; ++i) {
-                if (!std::strcmp(algo, "AES"))
-                {
-                    AESEncrypt(mode, wstring_to_string(plaintext).c_str(), false, wstring_to_string(output).c_str(), key, iv);
-                }
-                else 
-                {
-                    DESEncrypt(mode, wstring_to_string(plaintext).c_str(), false, wstring_to_string(output).c_str(), key, iv);
-                }
-            }
-
-            auto end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            double averageTime = static_cast<double>(duration) / 1000.0;
-            std::wcout << L"Average time for encryption over 1000 rounds: " << averageTime << L" ms\n";
-            
-
-            // Create a ciphertext file for decryption process later
+            // Encrypt        
             if (!std::strcmp(algo, "AES"))
             {
                 AESEncrypt(mode, wstring_to_string(plaintext).c_str(), true, wstring_to_string(output).c_str(), key, iv);
@@ -760,14 +762,14 @@ int main(int argc, char* argv[])
                 DESEncrypt(mode, wstring_to_string(plaintext).c_str(), true, wstring_to_string(output).c_str(), key, iv);
             }
 
-            // std::string result;
-            // FileSource(
-            //     wstring_to_string(output).c_str(), true, 
-            //     new HexEncoder(
-            //         new StringSink(result)
-            //     )  
-            // );
-            // std::wcout << L"Result: " << string_to_wstring(result) << "\n";
+            std::string result;
+            FileSource(
+                wstring_to_string(output).c_str(), true, 
+                new HexEncoder(
+                    new StringSink(result)
+                )  
+            );
+            std::wcout << L"Result: " << string_to_wstring(result) << "\n";
             break;
         }
         case 3: 
@@ -829,44 +831,25 @@ int main(int argc, char* argv[])
             int len = ciphertext.size();
             CryptoPP::byte *cipherBytes = new CryptoPP::byte[len];
             std::memcpy(cipherBytes, ciphertext.data(), len);
-
-            auto start = std::chrono::high_resolution_clock::now();
-        
-            for (int i = 0; i < 1000; ++i) 
-            {
-                if (!std::strcmp(algo, "AES")) 
-                {
-                    AESDecrypt(mode, cipherBytes, len, false, wstring_to_string(output).c_str(), key, iv);
-                }   
-                else 
-                {
-                    DESDecrypt(mode, cipherBytes, len, false, wstring_to_string(output).c_str(), key, iv);
-                }    
-            }
-
-            auto end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            double averageTime = static_cast<double>(duration) / 1000.0;
-            std::wcout << L"Average time for decryption over 1000 rounds: " << averageTime << L" ms\n";
-
+    
             // Check result
-            // if (!std::strcmp(algo, "AES")) 
-            // {
-            //     AESDecrypt(mode, cipherBytes, len, true, wstring_to_string(output).c_str(), key, iv);
-            // }   
-            // else 
-            // {
-            //     DESDecrypt(mode, cipherBytes, len, true, wstring_to_string(output).c_str(), key, iv);
-            // }
+            if (!std::strcmp(algo, "AES")) 
+            {
+                AESDecrypt(mode, cipherBytes, len, true, wstring_to_string(output).c_str(), key, iv);
+            }   
+            else 
+            {
+                DESDecrypt(mode, cipherBytes, len, true, wstring_to_string(output).c_str(), key, iv);
+            }
             
-            // std::string result;
-            // FileSource(
-            //     wstring_to_string(output).c_str(), true, 
-            //     new StringSink(result)
-            // );
-            // std::wcout << L"Result: " << string_to_wstring(result) << "\n";
-            // delete[] cipherBytes;
-            // break;
+            std::string result;
+            FileSource(
+                wstring_to_string(output).c_str(), true, 
+                new StringSink(result)
+            );
+            std::wcout << L"Result: " << string_to_wstring(result) << "\n";
+            delete[] cipherBytes;
+            break;
         }
         default:
             std::wcout << L"Invalid input\n";

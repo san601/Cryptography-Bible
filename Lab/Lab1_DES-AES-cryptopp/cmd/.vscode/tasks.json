@@ -75,13 +75,14 @@
                 "/GS",  // Enable security checks
                 "/Oi",  // Optimize code for maximum speed
                 "/W4",  // Set warning level to 4
+				"/LD",  // Create a DLL
                 "/Zi",  // Generate complete debugging information
                 "/nologo",  // Suppress startup banner
                 "/EHsc",  // Enable C++ exception handling
                 "/ID:\\cryptolibrary\\include",  // Include directory
                 "${file}",  // Input source file
                 "/link", // feed to linker
-                "/OUT:${fileDirname}\\${fileBasenameNoExtension}.exe",  // Output file name
+                "/OUT:${fileDirname}\\${fileBasenameNoExtension}.dll",  // Output file name
                 "/LIBPATH:D:\\cryptolibrary\\libs\\cryptopp\\msvc",  // Library path
                 "cryptlib.lib",  // Link with cryptlib.lib
                 "/MACHINE:X64"  // Target a 64-bit machine

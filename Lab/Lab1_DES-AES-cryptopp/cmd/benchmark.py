@@ -2,22 +2,18 @@ import subprocess
 import re
 
 def run_aes_cryptopp(inputs):
-    # Launch the binary
     proc = subprocess.Popen(
-        ["aes_cryptopp.exe"],
+        ["benchmark.exe"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
 
-    # Join inputs with newline and encode as UTF-16 LE
-    input_str = "\n".join(inputs) + "\n"  # Add final newline
+    input_str = "\n".join(inputs) + "\n"
     input_bytes = input_str.encode("utf-16-le")
 
-    # Send input
     stdout, stderr = proc.communicate(input=input_bytes)
 
-    # Decode output (program uses std::wcout -> UTF-16 LE)
     output_str = stdout.decode("utf-16-le", errors="ignore")
 
     match = re.search(

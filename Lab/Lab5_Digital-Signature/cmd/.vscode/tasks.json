@@ -44,9 +44,9 @@
 				"-O3", // optimal
 				"-DNDEBUG", // debug or release	
 				"${file}", 
-				"-shared", // create a shared library
+				// "-shared", // create a shared library
 				"-o", 
-				"${fileDirname}\\${fileBasenameNoExtension}-clang.so", // output file
+				"${fileDirname}\\${fileBasenameNoExtension}-clang.exe", // output file
 				"-D_WIN32_WINNT=0x0501", // windows version
 				"-lpthread", // parallel
 				"-LD:\\Repository\\Crypto\\openssl332\\gcc\\lib64", // libraries directory
@@ -79,7 +79,8 @@
 				"/Gm-", // Enable minimal rebuild
 				"/Gd", // Default calling convention
 				"/FC", // Show full path when diagnose
-                "/MTd",  // Link to static libraries
+                // "/MTd",  // Link to static libraries
+				"/MD",  // Link to dynamic libraries
                 "/GS",  // Enable security checks
                 "/Oi",  // Optimize code for maximum speed
                 "/W4",  // Set warning level to 4

@@ -6,6 +6,8 @@
 #include <openssl/evp.h>
 #include <openssl/x509.h>
 #include <openssl/err.h>
+#include <openssl/applink.c>
+
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -28,12 +30,12 @@
 extern "C" {
 #endif
  
-EXPORT bool generate_ecdsa_keypair(const char *curve_name_chr, const char *private_key_path_chr, const char *public_key_path_chr);
-EXPORT bool generate_rsa_keypair(int bits, const char *private_key_path_chr, const char *public_key_path_chr);
-EXPORT bool sign_ecdsa(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr);
-EXPORT bool sign_rsapss(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr);
-EXPORT bool verify_ecdsa(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr);
-EXPORT bool verify_rsapss(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr);
+EXPORT bool generate_ecdsa_keypair(const char *curve_name_chr, const char *private_key_path_chr, const char *public_key_path_chr, const char *format_chr);
+EXPORT bool generate_rsa_keypair(int bits, const char *private_key_path_chr, const char *public_key_path_chr, const char *format_chr);
+EXPORT bool sign_ecdsa(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr);
+EXPORT bool sign_rsapss(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr);
+EXPORT bool verify_ecdsa(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr);
+EXPORT bool verify_rsapss(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr);
  
 #ifdef __cplusplus
 }
@@ -57,7 +59,7 @@ using EVP_MD_CTX_ptr = ossl_unique_ptr<EVP_MD_CTX, EVP_MD_CTX_free>;
 // Helper to load private key (moved to helpers.cpp, but keep a local version for now if needed)
 // Or better: ensure helpers.cpp is linked correctly and remove this duplicate.
 // Assuming helpers.cpp is linked, we declare it here:
-EVP_PKEY_ptr load_private_key(const std::string& key_path);
+// EVP_PKEY_ptr load_private_key(const std::string& key_path);
 
 // --- File I/O Helpers ---
 bool read_file_bytes(const std::string& file_path, std::vector<unsigned char>& data) {
@@ -126,63 +128,110 @@ std::string base64_encode(const std::vector<unsigned char>& input) {
 // --- Key Loading Helper ---
 // Defined in key_generation.cpp, but needed here too. Ideally in helpers.cpp
 // For now, we duplicate the definition. A better approach is linking object files.
-EVP_PKEY_ptr load_private_key(const std::string& key_path) {
+EVP_PKEY_ptr load_private_key(const std::string& key_path, const std::string& format = "pem") {
     BIO_ptr key_bio(BIO_new_file(key_path.c_str(), "rb"), BIO_free_all);
     if (!key_bio) {
         handle_openssl_error("BIO_new_file for loading private key");
-        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free); // Corrected return for unique_ptr
+        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
     }
-    // Try reading as PKCS8 first, then specific types if needed
-    EVP_PKEY* pkey_raw = PEM_read_bio_PrivateKey(key_bio.get(), nullptr, nullptr, nullptr);
-    if (!pkey_raw) {
-        // Reset BIO position if first read failed
-        BIO_ctrl(key_bio.get(), BIO_CTRL_RESET, 0, nullptr);
-        // Try reading as RSA specifically (older format)
-        RSA* rsa_raw = PEM_read_bio_RSAPrivateKey(key_bio.get(), nullptr, nullptr, nullptr);
-        if (rsa_raw) {
-            pkey_raw = EVP_PKEY_new();
-            if (pkey_raw && EVP_PKEY_assign_RSA(pkey_raw, rsa_raw)) {
-                // Success, EVP_PKEY owns rsa_raw now
-            } else {
-                RSA_free(rsa_raw);
-                EVP_PKEY_free(pkey_raw);
-                pkey_raw = nullptr;
-            }
-        } else {
-             // Reset BIO position again
-             BIO_ctrl(key_bio.get(), BIO_CTRL_RESET, 0, nullptr);
-             // Try reading as EC specifically
-             EC_KEY* ec_raw = PEM_read_bio_ECPrivateKey(key_bio.get(), nullptr, nullptr, nullptr);
-             if (ec_raw) {
-                 pkey_raw = EVP_PKEY_new();
-                 if (pkey_raw && EVP_PKEY_assign_EC_KEY(pkey_raw, ec_raw)) {
-                     // Success, EVP_PKEY owns ec_raw now
-                 } else {
-                     EC_KEY_free(ec_raw);
-                     EVP_PKEY_free(pkey_raw);
-                     pkey_raw = nullptr;
-                 }
-             }
-        }
+    
+    if (format != "pem" && format != "der") {
+        std::cerr << "Error: Unsupported format '" << format << "'. Use 'pem' or 'der'." << std::endl;
+        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
     }
 
-    if (!pkey_raw) {
-        handle_openssl_error("Failed to read private key (tried PKCS8, RSA, EC)");
-        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free); // Corrected return for unique_ptr
+    EVP_PKEY* pkey_raw = nullptr;
+
+    if (format == "pem") {
+        // Try reading PEM formats
+        // Try reading as PKCS8 first
+        pkey_raw = PEM_read_bio_PrivateKey(key_bio.get(), nullptr, nullptr, nullptr);
+        
+        if (!pkey_raw) {
+            // Reset BIO position if first read failed
+            BIO_ctrl(key_bio.get(), BIO_CTRL_RESET, 0, nullptr);
+            // Try reading as RSA specifically
+            RSA* rsa_raw = PEM_read_bio_RSAPrivateKey(key_bio.get(), nullptr, nullptr, nullptr);
+            if (rsa_raw) {
+                pkey_raw = EVP_PKEY_new();
+                if (pkey_raw && EVP_PKEY_assign_RSA(pkey_raw, rsa_raw)) {
+                    // Success, EVP_PKEY owns rsa_raw now
+                } else {
+                    RSA_free(rsa_raw);
+                    EVP_PKEY_free(pkey_raw);
+                    pkey_raw = nullptr;
+                }
+            } else {
+                // Reset BIO position again
+                BIO_ctrl(key_bio.get(), BIO_CTRL_RESET, 0, nullptr);
+                // Try reading as EC specifically
+                EC_KEY* ec_raw = PEM_read_bio_ECPrivateKey(key_bio.get(), nullptr, nullptr, nullptr);
+                if (ec_raw) {
+                    pkey_raw = EVP_PKEY_new();
+                    if (pkey_raw && EVP_PKEY_assign_EC_KEY(pkey_raw, ec_raw)) {
+                        // Success, EVP_PKEY owns ec_raw now
+                    } else {
+                        EC_KEY_free(ec_raw);
+                        EVP_PKEY_free(pkey_raw);
+                        pkey_raw = nullptr;
+                    }
+                }
+            }
+        }
+    } else { // der
+        // Try reading as PKCS8 DER first
+        pkey_raw = d2i_PrivateKey_bio(key_bio.get(), nullptr);
+        
+        if (!pkey_raw) {
+            // Reset BIO position if first read failed
+            BIO_ctrl(key_bio.get(), BIO_CTRL_RESET, 0, nullptr);
+            // Try reading as RSA DER specifically
+            RSA* rsa_raw = d2i_RSAPrivateKey_bio(key_bio.get(), nullptr);
+            if (rsa_raw) {
+                pkey_raw = EVP_PKEY_new();
+                if (pkey_raw && EVP_PKEY_assign_RSA(pkey_raw, rsa_raw)) {
+                    // Success, EVP_PKEY owns rsa_raw now
+                } else {
+                    RSA_free(rsa_raw);
+                    EVP_PKEY_free(pkey_raw);
+                    pkey_raw = nullptr;
+                }
+            } else {
+                // Reset BIO position again
+                BIO_ctrl(key_bio.get(), BIO_CTRL_RESET, 0, nullptr);
+                // Try reading as EC DER specifically
+                EC_KEY* ec_raw = d2i_ECPrivateKey_bio(key_bio.get(), nullptr);
+                if (ec_raw) {
+                    pkey_raw = EVP_PKEY_new();
+                    if (pkey_raw && EVP_PKEY_assign_EC_KEY(pkey_raw, ec_raw)) {
+                        // Success, EVP_PKEY owns ec_raw now
+                    } else {
+                        EC_KEY_free(ec_raw);
+                        EVP_PKEY_free(pkey_raw);
+                        pkey_raw = nullptr;
+                    }
+                }
+            }
+        }
     }
+    if (!pkey_raw) {
+        std::string error_msg = "Failed to read " + format + " private key (tried PKCS8, RSA, EC)";
+        handle_openssl_error(error_msg.c_str());
+        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
+    }
+    
     return EVP_PKEY_ptr(pkey_raw, EVP_PKEY_free);
 }
 
 // --- Key Generation Implementations ---
 
-bool generate_ecdsa_keypair(const char *curve_name_chr, const char *private_key_path_chr, const char *public_key_path_chr) {
-
-
+bool generate_ecdsa_keypair(const char *curve_name_chr, const char *private_key_path_chr, const char *public_key_path_chr, const char *format_chr = "pem") {
     EVP_PKEY_CTX_ptr pctx(EVP_PKEY_CTX_new_id(EVP_PKEY_EC, nullptr), EVP_PKEY_CTX_free);
 
     std::string curve_name(curve_name_chr);
     std::string private_key_path(private_key_path_chr);
     std::string public_key_path(public_key_path_chr);
+    std::string format(format_chr);
 
     if (!pctx) {
         handle_openssl_error("EVP_PKEY_CTX_new_id for EC");
@@ -212,9 +261,16 @@ bool generate_ecdsa_keypair(const char *curve_name_chr, const char *private_key_
         handle_openssl_error("BIO_new_file for private key");
         return false;
     }
-    if (PEM_write_bio_PrivateKey(priv_bio.get(), pkey.get(), nullptr, nullptr, 0, nullptr, nullptr) != 1) {
-        handle_openssl_error("PEM_write_bio_PrivateKey");
-        return false;
+    if (format == "pem") {
+        if (PEM_write_bio_PrivateKey(priv_bio.get(), pkey.get(), nullptr, nullptr, 0, nullptr, nullptr) != 1) {
+            handle_openssl_error("PEM_write_bio_PrivateKey");
+            return false;
+        }
+    } else { // DER format
+        if (i2d_PrivateKey_bio(priv_bio.get(), pkey.get()) != 1) {
+            handle_openssl_error("i2d_PrivateKey_bio");
+            return false;
+        }
     }
 
     // Write public key
@@ -223,19 +279,28 @@ bool generate_ecdsa_keypair(const char *curve_name_chr, const char *private_key_
         handle_openssl_error("BIO_new_file for public key");
         return false;
     }
-    if (PEM_write_bio_PUBKEY(pub_bio.get(), pkey.get()) != 1) {
-        handle_openssl_error("PEM_write_bio_PUBKEY");
-        return false;
+    if (format == "pem") {
+        if (PEM_write_bio_PUBKEY(pub_bio.get(), pkey.get()) != 1) {
+            handle_openssl_error("PEM_write_bio_PUBKEY");
+            return false;
+        }
+    } else { // DER format
+        if (i2d_PUBKEY_bio(pub_bio.get(), pkey.get()) != 1) {
+            handle_openssl_error("i2d_PUBKEY_bio");
+            return false;
+        }
     }
 
     return true;
 }
 
-bool generate_rsa_keypair(int bits, const char *private_key_path_chr, const char *public_key_path_chr) {
+bool generate_rsa_keypair(int bits, const char *private_key_path_chr, const char *public_key_path_chr, const char *format_chr = "pem") {
     EVP_PKEY_CTX_ptr pctx(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr), EVP_PKEY_CTX_free);
 
     std::string private_key_path(private_key_path_chr);
     std::string public_key_path(public_key_path_chr);
+    std::string format(format_chr);
+
 
     if (!pctx) {
         handle_openssl_error("EVP_PKEY_CTX_new_id for RSA");
@@ -265,16 +330,23 @@ bool generate_rsa_keypair(int bits, const char *private_key_path_chr, const char
         handle_openssl_error("BIO_new_file for private key");
         return false;
     }
-    // Use traditional format for broader compatibility, can use PKCS8 as well
-    // Note: EVP_PKEY_get0_RSA returns an internal pointer, do not free it.
-    const RSA* rsa_key = EVP_PKEY_get0_RSA(pkey.get());
-    if (!rsa_key) {
-        handle_openssl_error("EVP_PKEY_get0_RSA");
-        return false;
-    }
-    if (PEM_write_bio_RSAPrivateKey(priv_bio.get(), rsa_key, nullptr, nullptr, 0, nullptr, nullptr) != 1) {
-         handle_openssl_error("PEM_write_bio_RSAPrivateKey");
-         return false;
+    if (format == "pem") {
+        // Use traditional format for broader compatibility, can use PKCS8 as well
+        // Note: EVP_PKEY_get0_RSA returns an internal pointer, do not free it.
+        const RSA* rsa_key = EVP_PKEY_get0_RSA(pkey.get());
+        if (!rsa_key) {
+            handle_openssl_error("EVP_PKEY_get0_RSA");
+            return false;
+        }
+        if (PEM_write_bio_RSAPrivateKey(priv_bio.get(), rsa_key, nullptr, nullptr, 0, nullptr, nullptr) != 1) {
+            handle_openssl_error("PEM_write_bio_RSAPrivateKey");
+            return false;
+        }
+    } else { // der
+        if (i2d_PrivateKey_bio(priv_bio.get(), pkey.get()) != 1) {
+            handle_openssl_error("i2d_PrivateKey_bio");
+            return false;
+        }
     }
 
     // Write public key
@@ -283,20 +355,29 @@ bool generate_rsa_keypair(int bits, const char *private_key_path_chr, const char
         handle_openssl_error("BIO_new_file for public key");
         return false;
     }
-    if (PEM_write_bio_PUBKEY(pub_bio.get(), pkey.get()) != 1) {
-        handle_openssl_error("PEM_write_bio_PUBKEY");
-        return false;
+
+    if (format == "pem") {    
+        if (PEM_write_bio_PUBKEY(pub_bio.get(), pkey.get()) != 1) {
+            handle_openssl_error("PEM_write_bio_PUBKEY");
+            return false;
+        }
+    } else { // der
+        if (i2d_PUBKEY_bio(pub_bio.get(), pkey.get()) != 1) {
+            handle_openssl_error("i2d_PUBKEY_bio");
+            return false;
+        }
     }
 
     return true;
 }
 
-bool sign_ecdsa(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr) {
+bool sign_ecdsa(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr = "pem") {
     std::string private_key_path(private_key_path_chr);
     std::string message_path(message_path_chr);
     std::string signature_path(signature_path_chr);
+    std::string format(format_chr);
 
-    EVP_PKEY_ptr pkey = load_private_key(private_key_path);
+    EVP_PKEY_ptr pkey = load_private_key(private_key_path, format);
     if (!pkey) {
         return false;
     }
@@ -351,12 +432,13 @@ bool sign_ecdsa(const char *private_key_path_chr, const char *message_path_chr, 
     return true;
 }
 
-bool sign_rsapss(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr) {
+bool sign_rsapss(const char *private_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr = "pem") {
     std::string private_key_path(private_key_path_chr);
     std::string message_path(message_path_chr);
     std::string signature_path(signature_path_chr);
+    std::string format(format_chr);
 
-    EVP_PKEY_ptr pkey = load_private_key(private_key_path);
+    EVP_PKEY_ptr pkey = load_private_key(private_key_path, format);
     if (!pkey) {
         return false;
     }
@@ -436,28 +518,50 @@ bool sign_rsapss(const char *private_key_path_chr, const char *message_path_chr,
 }
 
 // Helper to load public key (implementation)
-EVP_PKEY_ptr load_public_key(const std::string& key_path) {
-    BIO_ptr key_bio(BIO_new_file(key_path.c_str(), "rb"), BIO_free_all); // Corrected init
-    if (!key_bio) {
+EVP_PKEY_ptr load_public_key(const std::string& key_path, const std::string& format = "pem") {
+    BIO_ptr key_bio(BIO_new_file(key_path.c_str(), "rb"), BIO_free_all);
+    if (!key_bio) 
+    {
         handle_openssl_error("BIO_new_file for loading public key");
-        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free); // Corrected return
+        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
     }
-    EVP_PKEY* pkey_raw = PEM_read_bio_PUBKEY(key_bio.get(), nullptr, nullptr, nullptr);
-    if (!pkey_raw) {
-        handle_openssl_error("PEM_read_bio_PUBKEY");
-        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free); // Corrected return
+
+    EVP_PKEY* pkey_raw = nullptr;
+    
+    if (format == "pem") 
+    {
+        pkey_raw = PEM_read_bio_PUBKEY(key_bio.get(), nullptr, nullptr, nullptr);
+        if (!pkey_raw) {
+            handle_openssl_error("PEM_read_bio_PUBKEY");
+            return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
+        }
+    } 
+    else if (format == "der") 
+    {
+        pkey_raw = d2i_PUBKEY_bio(key_bio.get(), nullptr);
+        if (!pkey_raw) {
+            handle_openssl_error("d2i_PUBKEY_bio");
+            return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
+        }
+    } 
+    else 
+    {
+        std::cerr << "Error: Unsupported format '" << format << "'. Use 'pem' or 'der'." << std::endl;
+        return EVP_PKEY_ptr(nullptr, EVP_PKEY_free);
     }
-    return EVP_PKEY_ptr(pkey_raw, EVP_PKEY_free); // Corrected init
+    
+    return EVP_PKEY_ptr(pkey_raw, EVP_PKEY_free);
 }
 
 // --- Verification Implementations ---
 
-bool verify_ecdsa(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr) {
+bool verify_ecdsa(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr = "pem") {
     std::string public_key_path(public_key_path_chr);
     std::string message_path(message_path_chr);
     std::string signature_path(signature_path_chr);
+    std::string format(format_chr);
     
-    EVP_PKEY_ptr pkey = load_public_key(public_key_path);
+    EVP_PKEY_ptr pkey = load_public_key(public_key_path, format);
     if (!pkey) {
         return false;
     }
@@ -511,12 +615,13 @@ bool verify_ecdsa(const char *public_key_path_chr, const char *message_path_chr,
     }
 }
 
-bool verify_rsapss(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr) {
+bool verify_rsapss(const char *public_key_path_chr, const char *message_path_chr, const char *signature_path_chr, const char *format_chr = "pem") {
     std::string public_key_path(public_key_path_chr);
     std::string message_path(message_path_chr);
     std::string signature_path(signature_path_chr);
+    std::string format(format_chr);
 
-    EVP_PKEY_ptr pkey = load_public_key(public_key_path);
+    EVP_PKEY_ptr pkey = load_public_key(public_key_path, format);
     if (!pkey) {
         return false;
     }
@@ -595,18 +700,18 @@ bool verify_rsapss(const char *public_key_path_chr, const char *message_path_chr
 void print_usage() {
     std::cerr << "Usage: digital_signature <command> [options]" << std::endl;
     std::cerr << "Commands & Options:" << std::endl;
-    std::cerr << "  --gen-ecdsa <curve> <privkey_out> <pubkey_out>" << std::endl;
-    std::cerr << "      Example: --gen-ecdsa prime256v1 ecdsa_priv.pem ecdsa_pub.pem" << std::endl;
-    std::cerr << "  --gen-rsa <bits> <privkey_out> <pubkey_out>" << std::endl;
-    std::cerr << "      Example: --gen-rsa 2048 rsa_priv.pem rsa_pub.pem" << std::endl;
-    std::cerr << "  --sign-ecdsa <privkey> <message_file> <signature_out>" << std::endl;
-    std::cerr << "      Example: --sign-ecdsa ecdsa_priv.pem message.txt ecdsa_signature.bin" << std::endl;
-    std::cerr << "  --sign-rsapss <privkey> <message_file> <signature_out>" << std::endl;
-    std::cerr << "      Example: --sign-rsapss rsa_priv.pem message.txt rsa_signature.bin" << std::endl;
-    std::cerr << "  --verify-ecdsa <pubkey> <message_file> <signature_file>" << std::endl;
-    std::cerr << "      Example: --verify-ecdsa ecdsa_pub.pem message.txt ecdsa_signature.bin" << std::endl;
-    std::cerr << "  --verify-rsapss <pubkey> <message_file> <signature_file>" << std::endl;
-    std::cerr << "      Example: --verify-rsapss rsa_pub.pem message.txt rsa_signature.bin" << std::endl;
+    std::cerr << "  --gen-ecdsa <curve> <privkey_out> <pubkey_out> <der/pem>" << std::endl;
+    std::cerr << "      Example: --gen-ecdsa prime256v1 ecdsa_priv.pem ecdsa_pub.pem pem" << std::endl;
+    std::cerr << "  --gen-rsa <bits> <privkey_out> <pubkey_out> <der/pem>" << std::endl;
+    std::cerr << "      Example: --gen-rsa 2048 rsa_priv.pem rsa_pub.pem pem" << std::endl;
+    std::cerr << "  --sign-ecdsa <privkey> <message_file> <signature_out> <der/pem>" << std::endl;
+    std::cerr << "      Example: --sign-ecdsa ecdsa_priv.pem message.txt ecdsa_signature.bin pem" << std::endl;
+    std::cerr << "  --sign-rsapss <privkey> <message_file> <signature_out> <der/pem>" << std::endl;
+    std::cerr << "      Example: --sign-rsapss rsa_priv.pem message.txt rsa_signature.bin pem" << std::endl;
+    std::cerr << "  --verify-ecdsa <pubkey> <message_file> <signature_file> <der/pem>" << std::endl;
+    std::cerr << "      Example: --verify-ecdsa ecdsa_pub.pem message.txt ecdsa_signature.bin pem" << std::endl;
+    std::cerr << "  --verify-rsapss <pubkey> <message_file> <signature_file> <der/pem>" << std::endl;
+    std::cerr << "      Example: --verify-rsapss rsa_pub.pem message.txt rsa_signature.bin pem" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -619,37 +724,24 @@ int main(int argc, char *argv[]) {
     bool success = false;
 
     try {
-        if (command == "--gen-ecdsa" && argc == 5) {
-            success = generate_ecdsa_keypair(argv[2], argv[3], argv[4]);
-        } else if (command == "--gen-rsa" && argc == 5) {
+        if (command == "--gen-ecdsa" && argc == 6) {
+            success = generate_ecdsa_keypair(argv[2], argv[3], argv[4], argv[5]);
+        } else if (command == "--gen-rsa" && argc == 6) {
             int bits = std::stoi(argv[2]);
-            success = generate_rsa_keypair(bits, argv[3], argv[4]);
-        } else if (command == "--sign-ecdsa" && argc == 5) {
-            
-            char* private_key_path = argv[2];
-            char* message_path = argv[3];
-            char* signature_path = argv[4];
-            success = sign_ecdsa(private_key_path, message_path, signature_path);
-        } else if (command == "--sign-rsapss" && argc == 5) {
-            char* private_key_path = argv[2];
-            char* message_path = argv[3];
-            char* signature_path = argv[4];
-            success = sign_rsapss(private_key_path, message_path, signature_path);
-        } else if (command == "--verify-ecdsa" && argc == 5) {
-            char* public_key_path = argv[2];
-            char* message_path = argv[3];
-            char* signature_path = argv[4];
-            success = verify_ecdsa(public_key_path, message_path, signature_path);
+            success = generate_rsa_keypair(bits, argv[3], argv[4], argv[5]);
+        } else if (command == "--sign-ecdsa" && argc == 6) {
+            success = sign_ecdsa(argv[2], argv[3], argv[4], argv[5]);
+        } else if (command == "--sign-rsapss" && argc == 6) {
+            success = sign_rsapss(argv[2], argv[3], argv[4], argv[5]);
+        } else if (command == "--verify-ecdsa" && argc == 6) {
+            success = verify_ecdsa(argv[2], argv[3], argv[4], argv[5]);
             if (!success) {
                 std::cerr << "ECDSA verification failed." << std::endl;
             } else {
                 std::cout << "ECDSA verification succeeded." << std::endl;
             }
-        } else if (command == "--verify-rsapss" && argc == 5) {
-            char* public_key_path = argv[2];
-            char* message_path = argv[3];
-            char* signature_path = argv[4];
-            success = verify_rsapss(public_key_path, message_path, signature_path);
+        } else if (command == "--verify-rsapss" && argc == 6) {
+            success = verify_rsapss(argv[2], argv[3], argv[4], argv[5]);
             if (!success) {
                 std::cerr << "RSASSA-PSS verification failed." << std::endl;
             } else {
