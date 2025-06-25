@@ -111,3 +111,48 @@ print(decrypt_flag(shared_secret, iv, ciphertext))
 Result:
 
 ![image](https://github.com/user-attachments/assets/5a889a3c-2a2f-4821-8027-4fc82e4cb494)
+
+## Digestive
+
+Desc: Should ECDSA be avoided for better digestive health?
+
+From the source code of the server, we can see that it takes our username (which is, in my case, `falcon`), combine it with `{"admin": false}` and sign them altogether `sign({"admin": false, "username": "falcon"})`. But ECDSA only takes the left most n bit from the hash with n is the order of the generator (NIST FIPS 186-4 at the end of section 6.4). But this only work when you hash the message before signing it, which is not in this challenge:
+
+```python
+class HashFunc:
+    def __init__(self, data):
+        self.data = data
+
+    def digest(self):
+        # return hashlib.sha256(data).digest()
+        return self.data
+```
+
+So basically when we use the signed value from `sign({"admin": false, "username": "falcon"})` and verify it with a bigger message (bigger than n bit, in this challenge n is 192), the algorithm only take the first 192 bit of our message to sign. One more thing to consider is it is common to keep the last occurrence like this:
+
+```python
+>>> json.loads('{"admin": false, "admin": true}')
+{'admin': True}
+```
+
+So all we need to do is to add a `"admin": true` at the end of a long json string
+
+```python
+>>> len(json.dumps({"admin": False, "username": "falcon"}))
+38
+```
+
+38 bytes is greater than 192 bits the curve takes so we are good to go.
+
+```python
+import requests
+
+url = 'https://web.cryptohack.org/digestive/'
+
+response = requests.get(f'{url}/sign/falcon').json()
+print(response)
+msg = '{"admin": false, "username": "falcon", "admin": true}'
+print(requests.get(f'{url}/verify/{msg}/{response["signature"]}/').json()['flag'])
+```
+
+![image](https://github.com/user-attachments/assets/a9f29377-0046-4970-b7bf-107b94ba5262)
